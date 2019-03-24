@@ -3595,7 +3595,9 @@ var $;
         event() {
             return ({
                 "mousemove": (event) => this.event_mousemove(event),
+                "touchmove": (event) => this.event_mousemove(event),
                 "mouseleave": (event) => this.event_mouseleave(event),
+                "touchend": (event) => this.event_mouseleave(event),
             });
         }
         event_mousemove(event, force) {
@@ -4676,12 +4678,14 @@ var $;
                 if (!event || !this.need_inspect_day())
                     return;
                 this.is_fixed_inspect(!this.is_fixed_inspect());
-                this.inspect_x(event.offsetX);
+                const x = clientX(event) - actualOffsetLeft(this.dom_node().parentElement, document.body);
+                this.inspect_x(x);
             }
             event_mousemove(event, force) {
                 if (!event || !this.need_inspect_day() || this.is_fixed_inspect())
                     return;
-                this.inspect_x(event.offsetX);
+                const x = clientX(event) - actualOffsetLeft(this.dom_node().parentElement, document.body);
+                this.inspect_x(x);
             }
             event_mouseleave(event, force) {
                 if (!event || this.is_fixed_inspect())
