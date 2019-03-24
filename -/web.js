@@ -3952,6 +3952,7 @@ var $;
                 });
                 obj.event = () => ({
                     "mousedown": (event) => this.left_mousedown(event),
+                    "touchstart": (event) => this.left_mousedown(event),
                 });
                 obj.sub = () => [].concat(this.LeftRightResize());
                 return obj;
@@ -3994,6 +3995,7 @@ var $;
             return ((obj) => {
                 obj.event = () => ({
                     "mousedown": (event) => this.mid_mousedown(event),
+                    "touchstart": (event) => this.mid_mousedown(event),
                 });
                 obj.style = () => ({
                     "cursor": this.cursor_mid(),
@@ -4045,6 +4047,7 @@ var $;
                 });
                 obj.event = () => ({
                     "mousedown": (event) => this.right_mousedown(event),
+                    "touchstart": (event) => this.right_mousedown(event),
                 });
                 obj.sub = () => [].concat(this.RightLeftResize());
                 return obj;
@@ -5036,7 +5039,7 @@ var $;
                 return -this.resize_width() + this.right_resize_width();
             }
             right_right_resize_left() {
-                const result = !this.is_right_resizing() ? 0 : this.width() - this.right_width() - 1;
+                const result = !this.right_resize_radius() ? 0 : this.width() - this.right_width() - 1;
                 return result;
             }
             outer_resize_top() {
@@ -5184,7 +5187,7 @@ var $;
                 const mid_width = (selected_width - 2 * right_resize_width);
                 const ofs = actualOffsetLeft(this.Mid(), document.body);
                 const resize_width = this.resize_width();
-                let result = grabbing.x - ofs - resize_width / 2;
+                let result = grabbing - ofs - resize_width / 2;
                 if (result < 0) {
                     result = 0;
                 }
@@ -5282,13 +5285,17 @@ var $;
                     this.cursor_mid('grab');
                     this.cursor_non_mid('col-resize');
                     tg_app_node.removeEventListener('mousemove', mousemoveListener);
+                    tg_app_node.removeEventListener('touchmove', mousemoveListener);
                     tg_app_node.removeEventListener('mouseup', mouseupListener);
+                    tg_app_node.removeEventListener('touchend', mouseupListener);
                     if (onMouseUp !== void 0) {
                         onMouseUp();
                     }
                 };
                 tg_app_node.addEventListener('mousemove', mousemoveListener);
+                tg_app_node.addEventListener('touchmove', mousemoveListener);
                 tg_app_node.addEventListener('mouseup', mouseupListener);
+                tg_app_node.addEventListener('touchend', mouseupListener);
             }
             mid_mousedown(event) {
                 if (!event || this._is_in_mousedown)
@@ -5298,9 +5305,10 @@ var $;
                 const selected_width = this.selected_width();
                 const width = this.width();
                 this.is_grabbing(true);
-                this.grabbing_at({ x: event.clientX, y: event.clientY });
+                const x_initial = clientX(event);
+                this.grabbing_at(x_initial);
                 this.mousedown_helper('grab', (e) => {
-                    const delta = e.screenX - event.screenX;
+                    const delta = clientX(e) - x_initial;
                     let left_width_new = left_width + delta;
                     let right_width_new = right_width - delta;
                     if (left_width_new < 0) {
@@ -5313,6 +5321,12 @@ var $;
                     }
                     this.left_width(left_width_new);
                     this.right_width(right_width_new);
+                    {
+                        const left_width = this.left_width();
+                        const selected_width = this.selected_width();
+                        const right_width = this.right_width();
+                        const sum_width = left_width + selected_width + right_width;
+                    }
                 }, () => this.is_grabbing(false));
             }
             left_mousedown(event) {
@@ -5324,8 +5338,9 @@ var $;
                 const width = this.width();
                 const min_selected_width = this.min_selected_width();
                 this.is_left_resizing(true);
+                const x_initial = clientX(event);
                 this.mousedown_helper('col-resize', (e) => {
-                    const delta = e.screenX - event.screenX;
+                    const delta = clientX(e) - x_initial;
                     let left_width_new = left_width + delta;
                     let selected_width_new = selected_width - delta;
                     if (left_width_new < 0) {
@@ -5338,6 +5353,12 @@ var $;
                     }
                     this.left_width(left_width_new);
                     this.selected_width(selected_width_new);
+                    {
+                        const left_width = this.left_width();
+                        const selected_width = this.selected_width();
+                        const right_width = this.right_width();
+                        const sum_width = left_width + selected_width + right_width;
+                    }
                 }, () => this.is_left_resizing(false));
             }
             right_mousedown(event) {
@@ -5350,8 +5371,9 @@ var $;
                 const width = this.width();
                 const min_selected_width = this.min_selected_width();
                 this.is_right_resizing(true);
+                const x_initial = clientX(event);
                 this.mousedown_helper('col-resize', (e) => {
-                    const delta = e.screenX - event.screenX;
+                    const delta = clientX(e) - x_initial;
                     let right_width_new = right_width - delta;
                     let selected_width_new = selected_width + delta;
                     if (right_width_new < 0) {
@@ -5395,6 +5417,11 @@ var $;
             $.$mol_mem
         ], $tg_chart_selector.prototype, "selected_width", null);
         $$.$tg_chart_selector = $tg_chart_selector;
+        function clientX(event) {
+            return event.clientX !== void 0 ?
+                event.clientX :
+                event.changedTouches[0].clientX;
+        }
         class $tg_chart_selector_space extends $.$tg_chart_selector_space {
             flex() {
                 const width = this.width();

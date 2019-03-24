@@ -921,8 +921,8 @@ body{
 [tg_app] [tg_app_switch]{
     width:100%;
     flex:0 0 auto;
-    padding-bottom:calc(90px*var(--tg-k));
-    padding-top:calc(90px*var(--tg-k));
+    padding-bottom:calc(80px*var(--tg-k));
+    padding-top:calc(80px*var(--tg-k));
     display:flex;
     justify-content:center;
     align-items:center;
