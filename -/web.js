@@ -3636,6 +3636,28 @@ var $;
         view_box_height(val, force) {
             return (val !== void 0) ? val : null;
         }
+        Path(name) {
+            return ((obj) => {
+                obj.d = () => this.d(name);
+                obj.transform = () => this.transform();
+                obj.stroke = () => this.line_color(name);
+                obj.stroke_opacity = () => this.polyline_opacity(name);
+                obj.stroke_width = () => this.stroke_width();
+                return obj;
+            })(new this.$.$tg_svg_path);
+        }
+        d(name) {
+            return "";
+        }
+        transform() {
+            return "";
+        }
+        line_color(name) {
+            return "";
+        }
+        polyline_opacity(name, val, force) {
+            return (val !== void 0) ? val : null;
+        }
         Polyline(name) {
             return ((obj) => {
                 obj.points = () => this.points(name);
@@ -3648,15 +3670,6 @@ var $;
         }
         points(name) {
             return "";
-        }
-        transform() {
-            return "";
-        }
-        line_color(name) {
-            return "";
-        }
-        polyline_opacity(name, val, force) {
-            return (val !== void 0) ? val : null;
         }
         InspectCircle(name) {
             return ((obj) => {
@@ -3736,10 +3749,13 @@ var $;
     ], $tg_chart_graph.prototype, "view_box_height", null);
     __decorate([
         $.$mol_mem_key
-    ], $tg_chart_graph.prototype, "Polyline", null);
+    ], $tg_chart_graph.prototype, "Path", null);
     __decorate([
         $.$mol_mem_key
     ], $tg_chart_graph.prototype, "polyline_opacity", null);
+    __decorate([
+        $.$mol_mem_key
+    ], $tg_chart_graph.prototype, "Polyline", null);
     __decorate([
         $.$mol_mem_key
     ], $tg_chart_graph.prototype, "InspectCircle", null);
@@ -3831,6 +3847,32 @@ var $;
         }
     }
     $.$tg_svg_polyline = $tg_svg_polyline;
+})($ || ($ = {}));
+(function ($) {
+    class $tg_svg_path extends $.$mol_svg {
+        dom_name() {
+            return "path";
+        }
+        attr() {
+            return (Object.assign({}, super.attr(), { "d": this.d(), "transform": this.transform(), "stroke-width": this.stroke_width(), "stroke": this.stroke(), "stroke-opacity": this.stroke_opacity(), "vector-effect": "non-scaling-stroke" }));
+        }
+        d() {
+            return "";
+        }
+        transform() {
+            return "";
+        }
+        stroke_width() {
+            return 1;
+        }
+        stroke() {
+            return "blue";
+        }
+        stroke_opacity() {
+            return 1;
+        }
+    }
+    $.$tg_svg_path = $tg_svg_path;
 })($ || ($ = {}));
 (function ($) {
     class $tg_chart_selector extends $.$mol_view {
@@ -4778,6 +4820,21 @@ var $;
                     items.push(`${columns.x.values[i]},${columns[name].values[i]}`);
                 }
                 const result = items.join(' ');
+                return result;
+            }
+            d(name) {
+                const columns = this.chart().columns();
+                const items = [];
+                const count = columns.x.values.length;
+                for (let i = 0; i < count; i++) {
+                    if (!i) {
+                        items.push(`M${columns.x.values[i]},${columns[name].values[i]}`);
+                    }
+                    else {
+                        items.push(`l${columns.x.values[i] - columns.x.values[i - 1]},${columns[name].values[i] - columns[name].values[i - 1]}`);
+                    }
+                }
+                const result = items.join('');
                 return result;
             }
             line_color(name) {

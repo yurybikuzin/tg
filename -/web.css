@@ -950,7 +950,6 @@ body{
 
 [tg_chart_container] [tg_chart_container_body]{
     display:block;
-    border:1px solid var(--tg_chart_graph-border-bottom-color);
   }
 
 [tg_chart]{
@@ -962,6 +961,7 @@ body{
 }
 
 [tg_chart] [tg_chart_header]{
+    flex:0 0 auto;
     font-size:calc(36px*var(--tg-k));
     font-weight:var(--tg-font-medium-weight);
   }
@@ -971,7 +971,7 @@ body{
   height:100%;
 }
 
-[tg_chart_graph] polyline{
+[tg_chart_graph] polyline, [tg_chart_graph] path{
     fill:transparent;
   }
 
@@ -988,7 +988,7 @@ body{
   flex-direction:column;
   margin-top:var(--tg-chart-selected-area-margin-top);
   margin-bottom:var(--tg-chart-selected-area-margin-bottom);
-  flex:1 1;
+  flex:1 1 auto;
   max-height:calc(var(--tg-chart-height) - var(--tg-chart-selector-height) - var(--tg-chart-selected-area-margin-top) - var(--tg-chart-selected-area-margin-bottom));
   position:relative;
 }
