@@ -5036,7 +5036,7 @@ var $;
                 return -this.resize_width() + this.right_resize_width();
             }
             right_right_resize_left() {
-                const result = this.width() - this.right_width() - 1;
+                const result = !this.is_right_resizing() ? 0 : this.width() - this.right_width() - 1;
                 return result;
             }
             outer_resize_top() {

@@ -955,7 +955,7 @@ body{
 [tg_chart]{
   width:var(--tg-chart-size);
   height:var(--tg-chart-height);
-  margin:var(--tg-chart-margin-value) var(--tg-chart-margin-value) var(--tg-chart-margin-bottom) var(--tg-chart-margin-value);
+  margin:var(--tg-chart-margin-value) 0 var(--tg-chart-margin-bottom);
   display:flex;
   flex-direction:column;
 }
