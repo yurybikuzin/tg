@@ -5184,7 +5184,7 @@ var $;
                 const mid_width = (selected_width - 2 * right_resize_width);
                 const ofs = actualOffsetLeft(this.Mid(), document.body);
                 const resize_width = this.resize_width();
-                let result = grabbing.x - ofs - 20 - resize_width / 2;
+                let result = grabbing.x - ofs - resize_width / 2;
                 if (result < 0) {
                     result = 0;
                 }
@@ -5298,7 +5298,7 @@ var $;
                 const selected_width = this.selected_width();
                 const width = this.width();
                 this.is_grabbing(true);
-                this.grabbing_at({ x: event.screenX, y: event.screenY });
+                this.grabbing_at({ x: event.clientX, y: event.clientY });
                 this.mousedown_helper('grab', (e) => {
                     const delta = e.screenX - event.screenX;
                     let left_width_new = left_width + delta;
