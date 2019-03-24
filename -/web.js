@@ -3568,6 +3568,18 @@ var $;
 })($ || ($ = {}));
 (function ($) {
     class $tg_chart_graph extends $.$mol_view {
+        style() {
+            return ({
+                "width": this.graph_width(),
+                "height": this.graph_height(),
+            });
+        }
+        graph_width() {
+            return 0;
+        }
+        graph_height() {
+            return 0;
+        }
         left() {
             return null;
         }
@@ -4585,6 +4597,14 @@ var $;
         class $tg_chart_graph extends $.$tg_chart_graph {
             chart() {
                 const result = this['object_host()'].chart();
+                return result;
+            }
+            graph_width() {
+                const result = this['object_host()'].width();
+                return result;
+            }
+            graph_height() {
+                const result = this['object_host()'].height();
                 return result;
             }
             size(val) {
