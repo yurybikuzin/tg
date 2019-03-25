@@ -1188,7 +1188,20 @@ body{
   box-sizing:border-box;
 }
 
-[tg_chart_check_box] svg{
+[tg_chart_check_box] [tg_chart_check_box_effect]{
+    pointer-events:none;
+    position:absolute;
+    --tg_chart_check_box-effect-k:4;
+    width:calc(var(--tg_chart_check_box-circle-size)*var(--tg_chart_check_box-effect-k));
+    height:calc(var(--tg_chart_check_box-circle-size)*var(--tg_chart_check_box-effect-k));
+    left:calc(var(--tg_chart_check_box-padding-left) - var(--tg_chart_check_box-circle-size)*(var(--tg_chart_check_box-effect-k) - 1)/2);
+  }
+
+[tg_chart_check_box] [tg_chart_check_box_effect] circle{
+      stroke:rgb(215, 225, 233);
+    }
+
+[tg_chart_check_box] [tg_chart_check_box_iconchecked], [tg_chart_check_box] [tg_chart_check_box_iconnonchecked]{
     position:absolute;
     left:var(--tg_chart_check_box-padding-left);
     top:calc((var(--tg-chart-check-bar-height) - var(--tg_chart_check_box-circle-size))/2 - var(--tg_chart_check_box-border-width));

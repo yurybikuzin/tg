@@ -3144,6 +3144,33 @@ var $;
         color() {
             return "";
         }
+        sub() {
+            return [].concat(this.Icon(), this.label(), this.Effect());
+        }
+        Effect() {
+            return ((obj) => {
+                obj.sub = () => [].concat(this.Circle());
+                return obj;
+            })(new this.$.$mol_svg_root);
+        }
+        Circle() {
+            return ((obj) => {
+                obj.size = () => 100;
+                obj.stroke_width = () => 20;
+                obj.stroke_opacity = () => this.effect_opacity();
+                obj.r = () => this.effect_radius();
+                return obj;
+            })(new this.$.$tg_svg_circle);
+        }
+        effect_opacity(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        effect_radius(val, force) {
+            return (val !== void 0) ? val : null;
+        }
+        run_effect(val, force) {
+            return (val !== void 0) ? val : false;
+        }
         IconNonChecked() {
             return ((obj) => {
                 obj.view_box = () => "0 0 180 180";
@@ -3180,6 +3207,21 @@ var $;
             })(new this.$.$tg_svg_tick);
         }
     }
+    __decorate([
+        $.$mol_mem
+    ], $tg_chart_check_box.prototype, "Effect", null);
+    __decorate([
+        $.$mol_mem
+    ], $tg_chart_check_box.prototype, "Circle", null);
+    __decorate([
+        $.$mol_mem
+    ], $tg_chart_check_box.prototype, "effect_opacity", null);
+    __decorate([
+        $.$mol_mem
+    ], $tg_chart_check_box.prototype, "effect_radius", null);
+    __decorate([
+        $.$mol_mem
+    ], $tg_chart_check_box.prototype, "run_effect", null);
     __decorate([
         $.$mol_mem
     ], $tg_chart_check_box.prototype, "IconNonChecked", null);
@@ -4850,7 +4892,6 @@ var $;
             }
             polyline_opacity(name, val, force) {
                 const result = animate({
-                    stepMin: 1 / 16,
                     _super: (val, force) => super.polyline_opacity(name, val, force),
                     _master: () => this.chart().exclude_names(),
                     _value: (master) => master && master.has(name) ? 0 : 1,
@@ -4974,44 +5015,110 @@ var $;
             }
         }
         function animate(config, val, force) {
-            let result = config._super(val, force);
             const master = config._master();
+            let result = config._super(val, force);
             if (val === void 0) {
                 const value = config._value(master);
-                if (result === null) {
+                if (result === null || value === null) {
                     result = value;
                     config._super(result);
                 }
                 else if (result != value) {
-                    let data = config._data();
-                    if (data && data.value != value) {
-                        clearInterval(data.id);
-                        config._data(null);
-                    }
-                    data = config._data();
-                    if (!data) {
-                        const delta = value - result;
-                        const stepsMax = !config.stepsMax ? 16 : Math.ceil(Math.abs(config.stepsMax));
-                        const timeInterval = !config.timeInterval ? 16 : Math.ceil(Math.abs(config.timeInterval));
-                        let step = Math.abs(delta) / stepsMax;
-                        if (config.stepMin) {
-                            step = Math.max(Math.abs(config.stepMin), Math.abs(delta) / stepsMax);
+                    const _data = typeof config._data == 'function' ? config._data : (() => {
+                        const key = config.data_key;
+                        if (!key) {
+                            console.error('animate expects config._data or at least config.data_key', config);
                         }
-                        const steps = Math.ceil(Math.abs(delta) / step);
-                        step = delta / steps;
-                        let i = 0;
-                        const id = setInterval(() => {
-                            const value_new = result + step * ++i;
+                        else {
+                            return (val) => {
+                                if (val === void 0) {
+                                    return this[key];
+                                }
+                                else if (val === null) {
+                                    this[key] = null;
+                                }
+                                else {
+                                    this[key] = val;
+                                }
+                            };
+                        }
+                    })();
+                    if (!_data)
+                        return;
+                    let data = _data();
+                    const stopAnimation = () => {
+                        const data = config._data();
+                        clearInterval(data.id);
+                        cancelAnimationFrame(data.id);
+                        _data(null);
+                    };
+                    if (data && data.value != value) {
+                        stopAnimation();
+                    }
+                    data = _data();
+                    if (!data) {
+                        const defaults = {
+                            stepsMax: 16,
+                            timeInterval: 16,
+                        };
+                        const stepsMax = !config.stepsMax ? defaults.stepsMax : Math.ceil(Math.abs(config.stepsMax));
+                        const timeInterval = !config.timeInterval ? defaults.timeInterval : Math.ceil(Math.abs(config.timeInterval));
+                        const steps = typeof config._steps != 'function' ? stepsMax :
+                            Math.max(1, Math.min(stepsMax, config._steps(result, value)));
+                        const raf = timeInterval == defaults.timeInterval && window.requestAnimationFrame;
+                        const data = { value };
+                        const nextAnimation = () => {
+                            if (raf) {
+                                data.id = raf(stepAnimation);
+                            }
+                        };
+                        const finishAnimation = () => {
+                            stopAnimation();
+                            if (typeof config._finish == 'function') {
+                                config._finish();
+                            }
+                        };
+                        const _step_value = typeof config._step_value == 'function' ?
+                            config._step_value :
+                            (step, steps, initial, target) => initial + step * (target - initial) / steps;
+                        let step = 0;
+                        const stepAnimation = () => {
+                            const value_new = _step_value(++step, steps, result, value);
                             config._super(value_new);
-                            if (i >= steps)
-                                clearInterval(id);
-                        }, timeInterval);
-                        config._data({ value, id });
+                            if (step < steps) {
+                                nextAnimation();
+                            }
+                            else {
+                                finishAnimation();
+                            }
+                        };
+                        data.id = raf ? raf(stepAnimation) : setInterval(stepAnimation, timeInterval);
+                        _data(data);
                     }
                 }
             }
             return result;
         }
+        function easingValue(initial, target, t, fn = $$.easing.linear) {
+            const result = initial + (target - initial) * fn(t);
+            return result;
+        }
+        $$.easingValue = easingValue;
+        $$.easing = {
+            linear: function (t) { return t; },
+            easeInQuad: function (t) { return t * t; },
+            easeOutQuad: function (t) { return t * (2 - t); },
+            easeInOutQuad: function (t) { return t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t; },
+            easeInCubic: function (t) { return t * t * t; },
+            easeOutCubic: function (t) { return (--t) * t * t + 1; },
+            easeInOutCubic: function (t) { return t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1; },
+            easeInQuart: function (t) { return t * t * t * t; },
+            easeOutQuart: function (t) { return 1 - (--t) * t * t * t; },
+            easeInOutQuart: function (t) { return t < .5 ? 8 * t * t * t * t : 1 - 8 * (--t) * t * t * t; },
+            easeInQuint: function (t) { return t * t * t * t * t; },
+            easeOutQuint: function (t) { return 1 + (--t) * t * t * t * t; },
+            easeInOutQuint: function (t) { return t < .5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t; }
+        };
         class $tg_chart_selector extends $.$tg_chart_selector {
             chart() {
                 const result = this['object_host()'];
@@ -5486,6 +5593,101 @@ var $;
         class $tg_chart_check_box extends $.$tg_chart_check_box {
             Icon() {
                 const result = this.checked() ? super.IconChecked() : this.IconNonChecked();
+                return result;
+            }
+            event_activate(event) {
+                this.run_effect(true);
+                super.event_activate(event);
+            }
+            run_effect(val, force) {
+                if (val === true) {
+                    super.effect_radius(0);
+                    super.effect_opacity(0);
+                    new $.$mol_defer(() => {
+                        super.run_effect(false);
+                    });
+                }
+                const result = super.run_effect(val, force);
+                return result;
+            }
+            effect_radius(val, force) {
+                const result = animate({
+                    _super: (val, force) => super.effect_radius(val, force),
+                    _master: () => this.run_effect(),
+                    _value: (master) => {
+                        const result = !master && super.effect_radius() === null ? null : 50;
+                        return result;
+                    },
+                    _finish: () => {
+                        super.effect_radius(null);
+                    },
+                    _data: (val) => {
+                        const key = '_' + 'effect_radius' + '_anim_data';
+                        if (val === void 0) {
+                            return this[key];
+                        }
+                        else if (val === null) {
+                            this[key] = null;
+                        }
+                        else {
+                            this[key] = val;
+                        }
+                    },
+                }, val, force);
+                return result;
+            }
+            effect_opacity_first() {
+                return 0.8;
+            }
+            effect_opacity_mid() {
+                return 1;
+            }
+            effect_opacity_last() {
+                return 0.2;
+            }
+            effect_opacity(val, force) {
+                const result = animate({
+                    _super: (val, force) => super.effect_opacity(val, force),
+                    _master: () => this.run_effect(),
+                    _value: (master) => {
+                        const result = !master && super.effect_opacity() === null ? null : 1;
+                        return result;
+                    },
+                    _step_value: (step, steps, initial, target) => {
+                        let result;
+                        const phaseThreshold = Math.max(1, Math.round(steps / 4));
+                        if (step <= phaseThreshold) {
+                            const t = step / phaseThreshold;
+                            result = easingValue(0.6, 1, t);
+                        }
+                        else {
+                            const t = (step - phaseThreshold) / (steps - phaseThreshold);
+                            result = easingValue(1, 0, t, $$.easing.easeOutQuad);
+                        }
+                        return result;
+                    },
+                    _finish: () => {
+                        if (this.effect_opacity_phase == 0) {
+                            this.effect_opacity_phase = 1;
+                            this.effect_opacity(this.effect_opacity_last());
+                        }
+                        else {
+                            super.effect_opacity(null);
+                        }
+                    },
+                    _data: (val) => {
+                        const key = '_' + 'effect_opacity' + '_anim_data';
+                        if (val === void 0) {
+                            return this[key];
+                        }
+                        else if (val === null) {
+                            this[key] = null;
+                        }
+                        else {
+                            this[key] = val;
+                        }
+                    },
+                }, val, force);
                 return result;
             }
         }
