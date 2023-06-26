@@ -2,9 +2,7 @@
 
 [https://yurybikuzin.github.io/tg/](https://yurybikuzin.github.io/tg/)
 
-# Task
-
-## [https://t.me/contest](https://t.me/contest), March 9, 2019
+# Task, [https://t.me/contest](https://t.me/contest), March 9, 2019
 
 Telegram official coding competition for Android, iOS and JS developers starts tomorrow. 
 
